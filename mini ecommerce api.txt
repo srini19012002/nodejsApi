@@ -1,0 +1,266 @@
+the main moto is to create the 3api
+1.GET products api
+2.GET single product api
+3.CREATE product api
+
+
+npm init
+npm i nodemon
+npm i express
+
+code:app.js
+const express=require("express");
+const app=express();
+app.listen(3000,()=>{
+console.log("server is listening to the 3000 in production")
+});
+
+environement variable file la port and nodeenv variable attach pannanum
+create a folder name config=>>>create a env file(config.env)
+PORT=3000
+NODE_ENV=production
+
+to take the env file to app.js 
+install the package 
+npm i dotenv
+
+code:app.js
+const express=require("express");
+const app=express();
+const dotenv=require("dotenv");
+const path=require("path"); //default in nodejs
+dotenv.config({path:path.join(__dirname,"config","config.env")});  //dirname current folder after that config and config.env file.
+app.listen(process.env.PORT,()=>{
+console.log(`server is listening to the ${process.env.PORT} in ${process.env.NODE_ENV}`)
+});
+now we create the environment variables file and connect the app.js it is woking
+
+
+creating Routes & Controllers
+
+create a routes folder=>>create a two file (products.js and order.js)
+product.js =>get method
+order.js=>post method
+
+
+product.js code=
+const express=require('express');
+const router=express.Router();
+router.route('/product').get(getProducts);  //this will import from controllers file
+router.route('/product/:id').get(getSingleProducts);
+module.exports=router
+
+order.js code=
+const express=require('express');
+const router=express.Router();
+router.route('/order).post(createOrder); // there is no difference product is get method and order is post method
+module.exports=router;
+
+create a new folder controllers and new file(orderControllers.js and productControllers.js);
+productControllers code=
+exports.getProducts=(req,res,next)=>{
+res.json({
+sucess:true,
+message:'get products working'
+})
+}
+exports.getSingleProducts=(req,res,next)=>{
+res.json({
+sucess:true,
+message:'get Single products working'
+})
+}
+orderControllers.js code=
+
+exports.createOrder=(req,res,next)=>{
+res.json({
+sucess:true,
+message:'get Single products working'
+})
+}
+
+now import the routes file into app.js
+
+app.js code=
+const express=require("express");
+const app=express();
+const dotenv=require("dotenv");
+const path=require("path"); //default in nodejs
+dotenv.config({path:path.join(__dirname,"config","config.env")});  //dirname current folder after that config and config.env file.
+const products=require('./path);
+const order=require('./path);
+// set prefix
+app.use('/api/srinimern',products);
+app.use('/api/srinimern',order);
+
+app.listen(process.env.PORT,()=>{
+console.log(`server is listening to the ${process.env.PORT} in ${process.env.NODE_ENV}`)
+});
+
+
+now with the help of thunder client api testing test the url and the method wheather show the json file or not
+YES IT IS WORKING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+API IS WORKING!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+MONGO_DB connection
+connecting Database
+open mongodb website=>download community edition=>new connection=>connect the database through localhost.And copy the connection string
+under config create new file=>connectDatabase.js
+for connecting the database we want to install the package 
+npm i mongoose
+
+config.env file add the environment varaible =>DB_URL=copy the connection string/mini e-commerce
+
+connectDatabase.js
+const mongoose=require('mongoose');
+const connectDatabase=()=>{
+mongoose.connect(process.env.DB_URL).then((con)=>{
+console.log('Mongo Db is connected to the host'+con.connection.host )
+})
+}
+module.exports=connectDatabase();
+now exports the file to app.js
+const express=require("express");
+const app=express();
+const dotenv=require("dotenv");
+const path=require("path"); //default in nodejs
+const connectDatabase=require('./path')
+dotenv.config({path:path.join(__dirname,"config","config.env")});  //dirname current folder after that config and config.env file.
+
+connectDatabase();
+const products=require('./path);
+const order=require('./path);
+// set prefix
+app.use('/api/srinimern',products);
+app.use('/api/srinimern',order);
+
+app.listen(process.env.PORT,()=>{
+console.log(`server is listening to the ${process.env.PORT} in ${process.env.NODE_ENV}`)
+});
+MONGO DB is connected !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Creating Model
+on the backend folder =>create new folder=>models=>create new file(productModels.js)
+productModels.js=
+code
+const mongoose=require('mongoose');
+const productSchema=new mongoose.Schema({
+add the fields of the collection
+
+})
+const productModels=mongoose.model('Product',productSchema); //Product collection name it create the database by mini ecommerce api with collection name Product
+module.exports=productModels
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+create new folder data=>and store the data in the json format
+
+1.Get all product api
+open the controllers folders=>product controllers
+code=
+
+const productModel=require('./path')
+
+exports.getProducts=async(req,res,next)=>{
+const product=await productModel.find(); // this find method is used to get all the data in the database 
+
+res.json({
+sucess:true,
+message:'get products working'
+})
+}
+exports.getSingleProducts=(req,res,next)=>{
+res.json({
+sucess:true,
+products
+})
+}
+go to the api thunder client the data is shown API is WORKING!!!!!!!!!!!
+
+2.GET Single product APi
+product controllers code=
+
+
+const productModel=require('./path')
+
+exports.getProducts=async(req,res,next)=>{
+const product=await productModel.find(); // this find method is used to get all the data in the database 
+
+res.json({
+sucess:true,
+message:'get products working'
+})
+}
+exports.getSingleProducts=async(req,res,next)=>{ 
+// mongoose server is crashed when we pass the wrong id so instead of that u want to use the try catch block
+
+try{
+console.log(req.params.id,'ID');
+const singleProduct=await productModel.findByID(req.params.ID); 
+res.json({
+sucess:true,
+singleProducts
+})
+}
+catch(error){
+res.json({
+sucess:false,
+message:'not written the id properly'
+})
+}
+}
+3.Create Order api
+
+
+model=>new file(orderModel.js)
+orderModel.js code =
+const mongoose=require('mongoose');
+const orderSchema=new mongoose.Schema({
+Cartitems:Array,
+Amount:String,
+Status:String,
+CreatedAt:Date
+});
+const orderModel=mongoose.model('order',orderSchema);
+module.exports=orderModel;
+
+Go to the order controller model
+const orderModel=require('../path');
+
+exports.createOrder=(req,res,next)=>{
+//check whether the request is working or not
+console.log(req.body,'data');
+ 
+go to the thunder client createorderapi =>give the json object =>whether check it is printed in the console
+//app.js{
+app.use(express.json());//because it is to create the json file....
+}
+  res.json({
+    sucess:true,
+    message:"Create Order products is working"
+  })
+
+}
+//////////////////////////////////////////////DATA IS PRINTED IN THE CONSOLE/////////////////////////////////////////////////////////////////////////////////
+ordercontroller.js
+exports.createOrder=(req,res,next)=>{
+//now write the logic for this ??????????????????MOST IMPORTANT LGOIC>??????????????????????????????????????
+const cartitems=req.body;
+const amount =Number(cartitems.reduce((acc,item)=>(acc + item.product.price * item.qty),0)).toFixed(2);//number fixed to two decimal places
+console.log(amount,'Amount');
+const status='pending';
+const order=await orderModel.create({cartitems,amount,status}); 
+//SEE THE AMOUNT IS PRINTED IN THE CONSOLE///////////////////////////////////////////////////////////////////////
+  res.json({
+    sucess:true,
+    order
+  })
+}
+NOW GO THE THUNDER CLIENT CHECK WHETHER THE API IS WORKING AND CREATING AN ORDER COLLECTION AND INSIDE THE FIELDS CHECK AMOUNT IS MULTIPLED BY THE PRODUCT 
+AND CHECK ON THE DATABASE COLLECTION IS CREATED BUT THE STOCK IS NOT REDUCED SO I WANT TO WRITE THE LOGIC THAT 
+
+
+
+
+
